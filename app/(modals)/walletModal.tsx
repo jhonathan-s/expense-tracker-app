@@ -40,7 +40,7 @@ const WalletModal = () => {
   const onSubmit = async () => {
     let { name, image } = wallet
     if (!name.trim() || !image) {
-      Alert.alert('Wallet', 'Please fill all the fields.')
+      Alert.alert('Carteira', 'Por favor, preencha todos os campos.')
       return
     }
     const data: WalletType = {
@@ -54,7 +54,7 @@ const WalletModal = () => {
     setLoading(false)
     if (res.success) {
       router.back()
-    } else Alert.alert('Wallet', res.msg)
+    } else Alert.alert('Carteira', res.msg)
   }
 
   const onDelete = async () => {
@@ -64,21 +64,21 @@ const WalletModal = () => {
     setLoading(false)
     if (res.success) {
       router.back()
-    } else Alert.alert('Wallet', res.msg || 'Something went wrong')
+    } else Alert.alert('Carteira', res.msg || 'Algo deu errado')
   }
 
   const showDeleteAlert = () => {
     Alert.alert(
-      'Delete Wallet',
-      'Are you sure you want to delete this wallet?',
+      'Deletar Carteira',
+      'Tem certeza que deseja deletar esta carteira?',
       [
         {
-          text: 'Cancel',
+          text: 'Cancelar',
           onPress: () => console.log('Cancel Pressed'),
           style: 'cancel'
         },
         {
-          text: 'Delete',
+          text: 'Deletar',
           style: 'destructive',
           onPress: () => onDelete()
         }
@@ -90,28 +90,28 @@ const WalletModal = () => {
     <ModalWrapper>
       <View style={styles.container}>
         <Header
-          title={oldWallet?.id ? 'Update Wallet' : 'New Wallet'}
+          title={oldWallet?.id ? 'Atualizar Carteira' : 'Nova Carteira'}
           leftIcon={<BackButton />}
           style={{ marginBottom: spacingY._10 }}
         />
 
         <ScrollView contentContainerStyle={styles.form}>
           <View style={styles.inputContainer}>
-            <Typo color={colors.neutral200}>Wallet Name</Typo>
+            <Typo color={colors.neutral200}>Nome da Carteira</Typo>
             <Input
-              placeholder='Salary'
+              placeholder='Salário'
               value={wallet.name}
               onChangeText={(value) => setWallet({ ...wallet, name: value })}
             />
           </View>
 
           <View style={styles.inputContainer}>
-            <Typo color={colors.neutral200}>Wallet Icon</Typo>
+            <Typo color={colors.neutral200}>Ícone da Carteira</Typo>
             <ImageUpload
               file={wallet.image}
               onClear={() => setWallet({ ...wallet, image: null })}
               onSelect={(file) => setWallet({ ...wallet, image: file })}
-              placeholder='Upload Image'
+              placeholder='Enviar Imagem'
             />
           </View>
         </ScrollView>
@@ -134,7 +134,7 @@ const WalletModal = () => {
         )}
         <Button onPress={onSubmit} loading={loading} style={{ flex: 1 }}>
           <Typo color={colors.black} fontWeight={'700'}>
-            {oldWallet?.id ? 'Update Wallet' : 'Add Wallet'}
+            {oldWallet?.id ? 'Atualizar Carteira' : 'Adicionar Carteira'}
           </Typo>
         </Button>
       </View>

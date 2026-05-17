@@ -5,34 +5,19 @@ import TransactionList from '@/components/TransactionList'
 import { colors, radius, spacingX, spacingY } from '@/constants/theme'
 import { useAuth } from '@/contexts/authContext'
 import {
-  fetchMonthlyStats,
-  fetchWeeklyStats,
-  fetchYearlyStats
+  fetchMonthlyStats
 } from '@/services/transactionService'
 import { scale, verticalScale } from '@/utils/styling'
-import SegmentedControl from '@react-native-segmented-control/segmented-control'
 import React, { useEffect, useState } from 'react'
 import { Alert, ScrollView, StyleSheet, View } from 'react-native'
 import { BarChart } from 'react-native-gifted-charts'
 
 const Statistics = () => {
-  const [selectedIndex, setSelectedIndex] = useState(0)
   const [chartData, setChartData] = useState([])
   const [chartLoading, setChartLoading] = useState(false)
   const [transactions, setTransactions] = useState([])
   const { user } = useAuth()
 
-  const getWeeklyStats = async () => {
-    setChartLoading(true)
-    let res = await fetchWeeklyStats(user?.uid as string)
-    setChartLoading(false)
-    if (res.success) {
-      setChartData(res?.data?.stats)
-      setTransactions(res?.data?.transactions)
-    } else {
-      Alert.alert('Error', res?.message)
-    }
-  }
   const getMonthlyStats = async () => {
     setChartLoading(true)
     let res = await fetchMonthlyStats(user?.uid as string)
@@ -41,36 +26,19 @@ const Statistics = () => {
       setChartData(res?.data?.stats)
       setTransactions(res?.data?.transactions)
     } else {
-      Alert.alert('Error', res?.message)
-    }
-  }
-  const getYearlyStats = async () => {
-    setChartLoading(true)
-    let res = await fetchYearlyStats(user?.uid as string)
-    setChartLoading(false)
-    if (res.success) {
-      setChartData(res?.data?.stats)
-      setTransactions(res?.data?.transactions)
-    } else {
-      Alert.alert('Error', res?.message)
+      Alert.alert('Error', res?.msg)
     }
   }
 
   useEffect(() => {
-    if (selectedIndex === 0) {
-      getWeeklyStats()
-    } else if (selectedIndex === 1) {
-      getMonthlyStats()
-    } else {
-      getYearlyStats()
-    }
-  }, [selectedIndex])
+    getMonthlyStats()
+  }, [])
 
   return (
     <ScreenWrapper>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Header title='Statistics' />
+          <Header title='Estatísticas' />
         </View>
 
         <ScrollView
@@ -79,35 +47,19 @@ const Statistics = () => {
             paddingTop: spacingY._5,
             paddingBottom: verticalScale(100)
           }}>
-          <SegmentedControl
-            values={['Weekly', 'Monthly', 'Yearly']}
-            selectedIndex={selectedIndex}
-            onChange={(event) => {
-              setSelectedIndex(event.nativeEvent.selectedSegmentIndex)
-            }}
-            tintColor={colors.neutral200}
-            backgroundColor={colors.neutral800}
-            appearance='dark'
-            activeFontStyle={styles.segmentFontStyle}
-            style={styles.segmentStyle}
-            fontStyle={{ ...styles.segmentFontStyle, color: colors.white }}
-          />
-
           <View style={styles.chartContainer}>
             {chartData.length > 0 ? (
               <BarChart
                 data={chartData}
                 barWidth={scale(12)}
-                spacing={[1, 2].includes(selectedIndex) ? scale(25) : scale(16)}
+                spacing={scale(25)}
                 roundedBottom
                 roundedTop
                 hideRules
-                yAxisLabelPrefix='$'
+                yAxisLabelPrefix='R$'
                 yAxisThickness={0}
                 xAxisThickness={0}
-                yAxisLabelWidth={
-                  [1, 2].includes(selectedIndex) ? scale(38) : scale(35)
-                }
+                yAxisLabelWidth={scale(38)}
                 yAxisTextStyle={{ color: colors.neutral350 }}
                 xAxisLabelTextStyle={{
                   color: colors.neutral350,
@@ -117,7 +69,6 @@ const Statistics = () => {
                 minHeight={5}
                 isAnimated={true}
                 animationDuration={1000}
-                // maxValue={100}
               />
             ) : (
               <View style={styles.noChart} />
@@ -132,8 +83,8 @@ const Statistics = () => {
 
           <View>
             <TransactionList
-              title='Transactions'
-              emptyListMessage='No transactions found'
+              title='Transações'
+              emptyListMessage='Nenhuma transação encontrada'
               data={transactions}
             />
           </View>
@@ -171,14 +122,6 @@ const styles = StyleSheet.create({
     height: verticalScale(35),
     width: verticalScale(35),
     borderCurve: 'continuous'
-  },
-  segmentStyle: {
-    height: scale(37)
-  },
-  segmentFontStyle: {
-    fontSize: verticalScale(13),
-    fontWeight: 'bold',
-    color: colors.black
   },
   container: {
     paddingHorizontal: spacingX._20,

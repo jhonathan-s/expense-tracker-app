@@ -187,7 +187,7 @@ const revertAndUpdateWallets = async (
       // if user tries to convert income to expense on the same wallet
       // or if the user tried to increase the expense amount and dont have anough balance
       if (
-        oldTransaction.waalletId == newWalletId &&
+        oldTransaction.walletId == newWalletId &&
         revertedWalletAmount < newTransactionAmount
       ) {
         return {
@@ -306,10 +306,10 @@ export const fetchWeeklyStats = async (uid: string): Promise<ResponseType> => {
 
     const transactionQuery = query(
       collection(db, 'transactions'),
+      where('uid', '==', uid),
       where('date', '>=', Timestamp.fromDate(sevenDaysAgo)),
       where('date', '<=', Timestamp.fromDate(today)),
-      orderBy('date', 'desc'),
-      where('uid', '==', uid)
+      orderBy('date', 'desc')
     )
 
     const querySnapshot = await getDocs(transactionQuery)
@@ -374,10 +374,10 @@ export const fetchMonthlyStats = async (uid: string): Promise<ResponseType> => {
 
     const transactionQuery = query(
       collection(db, 'transactions'),
+      where('uid', '==', uid),
       where('date', '>=', Timestamp.fromDate(twelveMonthsAgo)),
       where('date', '<=', Timestamp.fromDate(today)),
-      orderBy('date', 'desc'),
-      where('uid', '==', uid)
+      orderBy('date', 'desc')
     )
 
     const querySnapshot = await getDocs(transactionQuery)
@@ -390,9 +390,21 @@ export const fetchMonthlyStats = async (uid: string): Promise<ResponseType> => {
       transactions.push(transaction)
 
       const transactionDate = (transaction.date as Timestamp).toDate()
-      const monthName = transactionDate.toLocaleString('default', {
-        month: 'short'
-      })
+      const monthsOfYear = [
+        "Jan",
+        "Fev",
+        "Mar",
+        "Abr",
+        "Mai",
+        "Jun",
+        "Jul",
+        "Ago",
+        "Set",
+        "Out",
+        "Nov",
+        "Dez",
+      ]
+      const monthName = monthsOfYear[transactionDate.getMonth()]
       const shortYear = transactionDate.getFullYear().toString().slice(-2)
       const monthData = monthlyData.find(
         (month) => month.month === `${monthName} ${shortYear}`
@@ -441,9 +453,8 @@ export const fetchYearlyStats = async (uid: string): Promise<ResponseType> => {
 
     const transactionQuery = query(
       collection(db, 'transactions'),
-
-      orderBy('date', 'desc'),
-      where('uid', '==', uid)
+      where('uid', '==', uid),
+      orderBy('date', 'desc')
     )
 
     const querySnapshot = await getDocs(transactionQuery)

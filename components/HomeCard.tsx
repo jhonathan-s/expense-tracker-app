@@ -44,7 +44,7 @@ const HomeCard = () => {
         <View>
           <View style={styles.totalBalanceRow}>
             <Typo color={colors.neutral800} size={17} fontWeight={'500'}>
-              Total Balance
+              Saldo Total
             </Typo>
             <DotsThreeOutline
               size={verticalScale(23)}
@@ -53,7 +53,7 @@ const HomeCard = () => {
             />
           </View>
           <Typo color={colors.black} size={30} fontWeight={'bold'}>
-            ${walletLoading ? '----' : getTotals()?.balance?.toFixed(2)}
+            R${walletLoading ? '----' : getTotals()?.balance?.toFixed(2)}
           </Typo>
         </View>
 
@@ -68,12 +68,12 @@ const HomeCard = () => {
                 />
               </View>
               <Typo size={16} color={colors.neutral700} fontWeight={'500'}>
-                Income
+                Receita
               </Typo>
             </View>
             <View style={{ alignSelf: 'center' }}>
               <Typo size={17} color={colors.green} fontWeight={'600'}>
-                ${walletLoading ? '----' : getTotals()?.income?.toFixed(2)}
+                R${walletLoading ? '----' : getTotals()?.income?.toFixed(2)}
               </Typo>
             </View>
           </View>
@@ -88,12 +88,12 @@ const HomeCard = () => {
                 />
               </View>
               <Typo size={16} color={colors.neutral700} fontWeight={'500'}>
-                Expense
+                Despesa
               </Typo>
             </View>
             <View style={{ alignSelf: 'center' }}>
               <Typo size={17} color={colors.rose} fontWeight={'600'}>
-                $
+                R$
                 {walletLoading
                   ? '----'
                   : getTotals()?.expenses?.toFixed(2) || 0}

@@ -21,7 +21,7 @@ const Login = () => {
 
   const handleSubmit = async () => {
     if (!emailRef.current || !passwordRef.current) {
-      Alert.alert('Login', 'Please fill all the fields')
+      Alert.alert('Entrar', 'Por favor, preencha todos os campos')
       return
     }
     setIsLoading(true)
@@ -40,19 +40,19 @@ const Login = () => {
 
         <View style={{ gap: 5, marginTop: spacingY._20 }}>
           <Typo size={30} fontWeight={'800'}>
-            Hey,
+            Olá,
           </Typo>
           <Typo size={30} fontWeight={'800'}>
-            Welcome Back
+            Bem-vindo de volta
           </Typo>
         </View>
 
         <View style={styles.form}>
           <Typo size={16} color={colors.textLighter}>
-            Login now to track all your expenses
+            Faça login para rastrear todas as suas despesas
           </Typo>
           <Input
-            placeholder={'Enter your email'}
+            placeholder={'Digite seu email'}
             onChangeText={(value) => (emailRef.current = value)}
             icon={
               <At
@@ -63,7 +63,7 @@ const Login = () => {
             }
           />
           <Input
-            placeholder={'Enter your password'}
+            placeholder={'Digite sua senha'}
             secureTextEntry
             onChangeText={(value) => (passwordRef.current = value)}
             icon={
@@ -76,21 +76,21 @@ const Login = () => {
           />
 
           <Typo size={14} color={colors.text} style={{ alignSelf: 'flex-end' }}>
-            Forgot Password?
+            Esqueceu a senha?
           </Typo>
 
           <Button loading={isLoading} onPress={handleSubmit}>
             <Typo fontWeight={'700'} color={colors.black} size={21}>
-              Login
+              Entrar
             </Typo>
           </Button>
         </View>
 
         <View style={styles.footer}>
-          <Typo size={15}>Don't have an account?</Typo>
+          <Typo size={15}>Não tem uma conta?</Typo>
           <Pressable onPress={() => router.navigate('/(auth)/register')}>
             <Typo size={15} fontWeight='700' color={colors.primary}>
-              Sign up
+              Inscrever-se
             </Typo>
           </Pressable>
         </View>

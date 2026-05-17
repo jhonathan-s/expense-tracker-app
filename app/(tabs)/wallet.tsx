@@ -36,10 +36,10 @@ const Wallet = () => {
         <View style={styles.balanceView}>
           <View style={{ alignItems: 'center' }}>
             <Typo size={45} fontWeight={'500'}>
-              ${getTotalBalance()?.toFixed(2)}
+              R${getTotalBalance()?.toFixed(2)}
             </Typo>
             <Typo size={16} color={colors.neutral300}>
-              Total Balance
+              Saldo Total
             </Typo>
           </View>
         </View>
@@ -47,7 +47,7 @@ const Wallet = () => {
         <View style={styles.wallets}>
           <View style={styles.flexRow}>
             <Typo size={20} fontWeight={'500'}>
-              My Wallets
+              Minhas Carteiras
             </Typo>
             <TouchableOpacity
               onPress={() => router.push('/(modals)/walletModal')}>

@@ -85,7 +85,7 @@ const TransactionItem = ({
   let category =
     item?.type == 'income' ? incomeCategory : expenseCategories[item.category!]
   const IconComponent = category.icon
-  const date = (item?.date as Timestamp)?.toDate().toLocaleDateString('en-GB', {
+  const date = (item?.date as Timestamp)?.toDate().toLocaleDateString('pt-BR', {
     month: 'short',
     day: 'numeric'
   })
@@ -120,7 +120,7 @@ const TransactionItem = ({
           <Typo
             fontWeight={'500'}
             color={item?.type == 'income' ? colors.primary : colors.rose}>
-            {`${item?.type == 'income' ? '+ $' : '- $'}${item?.amount}`}
+            {`${item?.type == 'income' ? '+ R$' : '- R$'}${item?.amount}`}
           </Typo>
           <Typo size={13} color={colors.neutral400}>
             {date}

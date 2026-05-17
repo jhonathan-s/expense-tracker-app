@@ -1,5 +1,5 @@
 import { firestore } from '@/config/firebase'
-import { collection, onSnapshot, query } from 'firebase/firestore'
+import { collection, onSnapshot, query, QueryConstraint } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { StyleSheet } from 'react-native'
 

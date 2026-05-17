@@ -21,25 +21,25 @@ const Profile = () => {
 
   const accountOptions: accountOptionType[] = [
     {
-      title: 'Edit Profile',
+      title: 'Editar Perfil',
       icon: <User size={26} color={colors.white} weight='fill' />,
       routeName: '/(modals)/profileModal',
       bgColor: '#6366f1'
     },
     {
-      title: 'Settings',
+      title: 'Configurações',
       icon: <GearSix size={26} color={colors.white} weight='fill' />,
       // routeName: '/(modals)/profileModal',
       bgColor: '#059669'
     },
     {
-      title: 'Privacy Policy',
+      title: 'Política de Privacidade',
       icon: <Lock size={26} color={colors.white} weight='fill' />,
       // routeName: '/(modals)/profileModal',
       bgColor: colors.neutral600
     },
     {
-      title: 'Logout',
+      title: 'Sair',
       icon: <Power size={26} color={colors.white} weight='fill' />,
       // routeName: '/(modals)/profileModal',
       bgColor: '#e11d48'
@@ -51,14 +51,14 @@ const Profile = () => {
   }
 
   const showLogoutAlert = () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
+    Alert.alert('Sair', 'Tem certeza que deseja sair?', [
       {
-        text: 'Cancel',
+        text: 'Cancelar',
         onPress: () => console.log('Cancel Pressed'),
         style: 'cancel'
       },
       {
-        text: 'Logout',
+        text: 'Sair',
         onPress: () => handleLogout(),
         style: 'destructive'
       }
@@ -66,7 +66,7 @@ const Profile = () => {
   }
 
   const handlePress = (item: accountOptionType) => {
-    if (item.title == 'Logout') {
+    if (item.title == 'Sair') {
       showLogoutAlert()
     }
     if (item.routeName) {
@@ -76,7 +76,7 @@ const Profile = () => {
   return (
     <ScreenWrapper>
       <View style={styles.container}>
-        <Header title='Profile' style={{ marginVertical: spacingY._10 }} />
+        <Header title='Perfil' style={{ marginVertical: spacingY._10 }} />
 
         <View style={styles.userInfo}>
           <View style={styles.avaterContainer}>

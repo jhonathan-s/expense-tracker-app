@@ -43,7 +43,7 @@ const SearchModal = () => {
     <ModalWrapper style={{ backgroundColor: colors.neutral900 }}>
       <View style={styles.container}>
         <Header
-          title={'Search'}
+          title={'Pesquisar'}
           leftIcon={<BackButton />}
           style={{ marginBottom: spacingY._10 }}
         />
@@ -51,7 +51,7 @@ const SearchModal = () => {
         <ScrollView contentContainerStyle={styles.form}>
           <View style={styles.inputContainer}>
             <Input
-              placeholder='Shoes...'
+              placeholder='Sapatos...'
               value={search}
               placeholderTextColor={colors.neutral400}
               containerStyle={{ backgroundColor: colors.neutral800 }}
@@ -63,7 +63,7 @@ const SearchModal = () => {
             <TransactionList
               loading={transactionLoading}
               data={filteredTransactions}
-              emptyListMessage='No transactions match your search keywords'
+              emptyListMessage='Nenhuma transação corresponde às suas palavras-chave de pesquisa'
             />
           </View>
         </ScrollView>

@@ -43,7 +43,7 @@ const ProfileModal = () => {
   const onSubmit = async () => {
     let { name, image } = userData
     if (!name.trim()) {
-      Alert.alert('User', 'Please fill all the fields.')
+      Alert.alert('Usuário', 'Por favor, preencha todos os campos.')
       return
     }
     setLoading(true)
@@ -52,7 +52,7 @@ const ProfileModal = () => {
     if (res.success) {
       updateUserData(user?.uid as string)
       router.back()
-    } else Alert.alert('User', res.msg)
+    } else Alert.alert('Usuário', res.message)
   }
 
   const onPickImage = async () => {
@@ -70,7 +70,7 @@ const ProfileModal = () => {
     <ModalWrapper>
       <View style={styles.container}>
         <Header
-          title='Update Profile'
+          title='Atualizar Perfil'
           leftIcon={<BackButton />}
           style={{ marginBottom: spacingY._10 }}
         />
@@ -90,9 +90,9 @@ const ProfileModal = () => {
           </View>
 
           <View style={styles.inputContainer}>
-            <Typo color={colors.neutral200}>Name</Typo>
+            <Typo color={colors.neutral200}>Nome</Typo>
             <Input
-              placeholder='Name'
+              placeholder='Nome'
               value={userData.name}
               onChangeText={(value) =>
                 setUserData({ ...userData, name: value })
@@ -105,7 +105,7 @@ const ProfileModal = () => {
       <View style={styles.footer}>
         <Button onPress={onSubmit} loading={loading} style={{ flex: 1 }}>
           <Typo color={colors.black} fontWeight={'700'}>
-            Update
+            Atualizar
           </Typo>
         </Button>
       </View>

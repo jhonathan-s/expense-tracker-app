@@ -18,7 +18,7 @@ const Welcome = () => {
           <TouchableOpacity
             onPress={() => router.push('/(auth)/login')}
             style={styles.loginButton}>
-            <Typo fontWeight={'500'}>Sign in</Typo>
+            <Typo fontWeight={'500'}>Entrar</Typo>
           </TouchableOpacity>
 
           <Animated.Image
@@ -34,10 +34,10 @@ const Welcome = () => {
             entering={FadeInDown.duration(1000).springify().damping(12)}
             style={{ alignItems: 'center' }}>
             <Typo size='30' fontWeight={'800'}>
-              Always take control
+              Sempre mantenha o controle
             </Typo>
             <Typo size='30' fontWeight='800'>
-              of your finances
+              de suas finanças
             </Typo>
           </Animated.View>
 
@@ -48,10 +48,10 @@ const Welcome = () => {
               .damping(12)}
             style={{ alignItems: 'center', gap: 2 }}>
             <Typo size={17} color={colors.textLight}>
-              Finances must be arranged to set a better
+              As finanças devem ser organizadas para definir um melhor
             </Typo>
             <Typo size={17} color={colors.textLight}>
-              lifestyle in future
+              estilo de vida no futuro
             </Typo>
           </Animated.View>
 
@@ -63,7 +63,7 @@ const Welcome = () => {
             style={styles.buttonContainer}>
             <Button onPress={() => router.push('/(auth)/register')}>
               <Typo size={22} color={colors.neutral900} fontWeight='600'>
-                Get Started
+                Começar
               </Typo>
             </Button>
           </Animated.View>
