@@ -6,21 +6,26 @@ import { scale, verticalScale } from '@/utils/styling'
 import { ImageBackground } from 'expo-image'
 import { orderBy, where } from 'firebase/firestore'
 import { ArrowDown, ArrowUp, DotsThreeOutline } from 'phosphor-react-native'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { StyleSheet, View } from 'react-native'
 import Typo from './Typo'
 
 const HomeCard = () => {
   const { user } = useAuth()
 
+  const constraints = useMemo(
+    () =>
+      user?.uid
+        ? [where('uid', '==', user.uid), orderBy('created', 'desc')]
+        : [],
+    [user?.uid]
+  )
+
   const {
     data: wallets,
     error,
     loading: walletLoading
-  } = useFetchData<WalletType>('wallets', [
-    where('uid', '==', user?.uid),
-    orderBy('created', 'desc')
-  ])
+  } = useFetchData<WalletType>('wallets', constraints)
 
   const getTotals = () => {
     return wallets.reduce(

@@ -1,38 +1,92 @@
 import Header from '@/components/Header'
-import Loading from '@/components/Loading'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import TransactionList from '@/components/TransactionList'
-import { colors, radius, spacingX, spacingY } from '@/constants/theme'
+import { colors, spacingX, spacingY } from '@/constants/theme'
 import { useAuth } from '@/contexts/authContext'
-import {
-  fetchMonthlyStats
-} from '@/services/transactionService'
+import useFetchData from '@/hooks/useFetchData'
+import { TransactionType } from '@/types'
 import { scale, verticalScale } from '@/utils/styling'
-import React, { useEffect, useState } from 'react'
-import { Alert, ScrollView, StyleSheet, View } from 'react-native'
+import React, { useMemo } from 'react'
+import { ScrollView, StyleSheet, View } from 'react-native'
 import { BarChart } from 'react-native-gifted-charts'
+import { orderBy, where, Timestamp } from 'firebase/firestore'
+import { getLast12Months } from '@/utils/common'
+import { colors as themeColors } from '@/constants/theme'
 
 const Statistics = () => {
-  const [chartData, setChartData] = useState([])
-  const [chartLoading, setChartLoading] = useState(false)
-  const [transactions, setTransactions] = useState([])
   const { user } = useAuth()
 
-  const getMonthlyStats = async () => {
-    setChartLoading(true)
-    let res = await fetchMonthlyStats(user?.uid as string)
-    setChartLoading(false)
-    if (res.success) {
-      setChartData(res?.data?.stats)
-      setTransactions(res?.data?.transactions)
-    } else {
-      Alert.alert('Error', res?.msg)
-    }
-  }
+  const constraints = useMemo(
+    () => (user?.uid ? [where('uid', '==', user.uid), orderBy('date', 'desc')] : []),
+    [user?.uid]
+  )
 
-  useEffect(() => {
-    getMonthlyStats()
-  }, [])
+  const { data: allTransactions, loading: transactionLoading } =
+    useFetchData<TransactionType>('transactions', constraints)
+
+  const transactions = useMemo(() => {
+    const today = new Date()
+    const startOfYear = new Date(today.getFullYear(), 0, 1)
+
+    return allTransactions.filter((transaction) => {
+      const transactionDate = (transaction.date as Timestamp).toDate()
+      return transactionDate >= startOfYear && transactionDate <= today
+    })
+  }, [allTransactions])
+
+  const chartData = useMemo(() => {
+    const monthlyData = getLast12Months()
+    const currentYear = new Date().getFullYear()
+
+    transactions.forEach((transaction) => {
+      if (!transaction.date || !transaction.amount || !transaction.type) return
+
+      const transactionDate = (transaction.date as Timestamp).toDate()
+      const transactionMonth = transactionDate.getMonth()
+      const transactionYear = transactionDate.getFullYear()
+
+      const monthData = monthlyData.find((month) => {
+        const [monthName] = month.month.split(' ')
+        const monthIndex = [
+          'Jan',
+          'Fev',
+          'Mar',
+          'Abr',
+          'Mai',
+          'Jun',
+          'Jul',
+          'Ago',
+          'Set',
+          'Out',
+          'Nov',
+          'Dez'
+        ].indexOf(monthName)
+        const yearFromMonth = parseInt(month.month.split(' ')[1], 10) + 2000
+
+        return monthIndex === transactionMonth && yearFromMonth === transactionYear
+      })
+
+      if (monthData) {
+        const amount = Number(transaction.amount)
+        if (transaction.type === 'income') {
+          monthData.income += amount
+        } else if (transaction.type === 'expense') {
+          monthData.expense += amount
+        }
+      }
+    })
+
+    return monthlyData.flatMap((month) => [
+      {
+        value: month.income,
+        label: month.month,
+        spacing: scale(4),
+        labelWidth: scale(30),
+        frontColor: themeColors.primary
+      },
+      { value: month.expense, frontColor: themeColors.rose }
+    ])
+  }, [transactions])
 
   return (
     <ScreenWrapper>
@@ -73,12 +127,6 @@ const Statistics = () => {
             ) : (
               <View style={styles.noChart} />
             )}
-
-            {chartLoading && (
-              <View style={styles.chartLoadingContainer}>
-                <Loading color={colors.white} />
-              </View>
-            )}
           </View>
 
           <View>
@@ -86,6 +134,7 @@ const Statistics = () => {
               title='Transações'
               emptyListMessage='Nenhuma transação encontrada'
               data={transactions}
+              loading={transactionLoading}
             />
           </View>
         </ScrollView>
@@ -102,26 +151,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center'
   },
-  chartLoadingContainer: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    borderRadius: radius._12,
-    backgroundColor: 'rgba(0,0,0,0.6)'
-  },
   header: {},
   noChart: {
     backgroundColor: 'rgba(0,0,0,0.05)',
     height: verticalScale(210)
-  },
-  searchIcon: {
-    backgroundColor: colors.neutral700,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 100,
-    height: verticalScale(35),
-    width: verticalScale(35),
-    borderCurve: 'continuous'
   },
   container: {
     paddingHorizontal: spacingX._20,

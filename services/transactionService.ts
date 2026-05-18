@@ -31,6 +31,21 @@ export const createOrUpdateTransaction = async (
       }
     }
 
+    if (image) {
+      // todo: upload image
+      const imageUploadRes = await uploadFileToCloudinary(
+        image,
+        'transactions'
+      )
+      if (!imageUploadRes.success) {
+        return {
+          success: false,
+          msg: "Couldn't upload image"
+        }
+      }
+      transactionData.image = imageUploadRes.data
+    }
+
     if (id) {
       // todo: update existing transaction
       const oldTransactionSnapshot = await getDoc(
@@ -55,6 +70,13 @@ export const createOrUpdateTransaction = async (
           return res
         }
       }
+
+      const transactionRef = doc(firestore, 'transactions', id)
+      await setDoc(transactionRef, transactionData, { merge: true })
+      return {
+        success: true,
+        data: { ...transactionData, id: transactionRef.id }
+      }
     } else {
       let res = await updateWalletForNewTransaction(
         walletId!,
@@ -65,25 +87,7 @@ export const createOrUpdateTransaction = async (
         return res
       }
 
-      if (image) {
-        // todo: upload image
-        const imageUploadRes = await uploadFileToCloudinary(
-          image,
-          'transactions'
-        )
-        if (!imageUploadRes.success) {
-          return {
-            success: false,
-            msg: "Couldn't upload image"
-          }
-        }
-        transactionData.image = imageUploadRes.data
-      }
-
-      const transactionRef = id
-        ? doc(firestore, 'transactions', id)
-        : doc(collection(firestore, 'transactions'))
-
+      const transactionRef = doc(collection(firestore, 'transactions'))
       await setDoc(transactionRef, transactionData, { merge: true })
       return {
         success: true,

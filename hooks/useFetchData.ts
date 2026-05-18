@@ -12,7 +12,8 @@ const useFetchData = <T>(
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!collectionName) return
+    if (!collectionName || !constraints || constraints.length === 0) return
+
     const collectionRef = collection(firestore, collectionName)
     const q = query(collectionRef, ...constraints)
 
@@ -34,7 +35,7 @@ const useFetchData = <T>(
       }
     )
     return () => unsub()
-  }, [])
+  }, [collectionName, JSON.stringify(constraints)])
   return { data, loading, error }
 }
 
