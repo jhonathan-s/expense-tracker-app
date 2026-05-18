@@ -128,11 +128,11 @@ const TransactionModal = () => {
   }
 
   const onDelete = async () => {
-    if (!oldTransaction?.id) return
+    if (!oldTransaction?.id || !oldTransaction?.walletId) return
     setLoading(true)
     const res = await deleteTransaction(
-      oldTransaction?.id,
-      oldTransaction?.walletId
+      oldTransaction.id,
+      oldTransaction.walletId
     )
     setLoading(false)
     console.log('res', res)
