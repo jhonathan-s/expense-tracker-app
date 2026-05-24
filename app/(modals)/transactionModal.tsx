@@ -359,7 +359,8 @@ const TransactionModal = () => {
       </View>
 
       <View style={styles.footer}>
-        {oldTransaction?.id && !loading && (
+        {/* delete transaction */}
+{/*         {oldTransaction?.id && !loading && (
           <Button
             onPress={showDeleteAlert}
             style={{
@@ -372,7 +373,7 @@ const TransactionModal = () => {
               weight='bold'
             />
           </Button>
-        )}
+        )} */}
         <Button onPress={onSubmit} loading={loading} style={{ flex: 1 }}>
           <Typo color={colors.black} fontWeight={'700'}>
             {oldTransaction?.id ? 'Atualizar' : 'Enviar'}
