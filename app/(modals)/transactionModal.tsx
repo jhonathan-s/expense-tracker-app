@@ -260,35 +260,76 @@ const TransactionModal = () => {
             <Typo color={colors.neutral200} size={16}>
               Data
             </Typo>
-            {!showDatePicker && (
-              <Pressable
-                style={styles.dateInput}
-                onPress={() => setShowDatePicker(true)}>
-                <Typo size={14}>
-                  {(transaction.date as Date).toLocaleDateString()}
-                </Typo>
-              </Pressable>
-            )}
-            {showDatePicker && (
-              <View style={Platform.OS == 'ios' && styles.iosDatePicker}>
-                <DateTimePicker
-                  themeVariant='dark'
-                  value={transaction.date as Date}
-                  textColor={colors.white}
-                  mode='date'
-                  display={Platform.OS == 'ios' ? 'spinner' : 'default'}
-                  onChange={onDateChange}
+
+            {Platform.OS === 'web' ? (
+              <>
+                <style>{`
+                  input[type="date"]::-webkit-calendar-picker-indicator { display: none; }
+                  input[type="date"] { appearance: none; -webkit-appearance: none; }
+                `}</style>
+                <input
+                  type="date"
+                  value={
+                    transaction.date instanceof Date && !isNaN((transaction.date as Date).getTime())
+                      ? (transaction.date as Date).toISOString().split('T')[0]
+                      : ''
+                  }
+                  onChange={(e) => {
+                    if (!e.target.value) return
+                    const selected = new Date(e.target.value + 'T00:00:00')
+                    if (!isNaN(selected.getTime())) {
+                      setTransaction({ ...transaction, date: selected })
+                    }
+                  }}
+                  style={{
+                    height: verticalScale(54),
+                    border: `1px solid ${colors.neutral300}`,
+                    borderRadius: radius._17,
+                    padding: '0 15px',
+                    backgroundColor: 'transparent',
+                    color: colors.white,
+                    fontSize: verticalScale(14),
+                    cursor: 'pointer',
+                    outline: 'none',
+                    width: '100%',
+                    boxSizing: 'border-box'
+                  } as React.CSSProperties}
                 />
-                {Platform.OS == 'ios' && (
-                  <TouchableOpacity
-                    style={styles.datePickerButton}
-                    onPress={() => setShowDatePicker(false)}>
-                    <Typo size={15} fontWeight={'500'}>
-                      Ok
+              </>
+            ) : (
+              // Native date picker for iOS / Android
+              <>
+                {!showDatePicker && (
+                  <Pressable
+                    style={styles.dateInput}
+                    onPress={() => setShowDatePicker(true)}>
+                    <Typo size={14}>
+                      {(transaction.date as Date).toLocaleDateString()}
                     </Typo>
-                  </TouchableOpacity>
+                  </Pressable>
                 )}
-              </View>
+                {showDatePicker && (
+                  <View style={Platform.OS == 'ios' && styles.iosDatePicker}>
+                    <DateTimePicker
+                      themeVariant='dark'
+                      value={transaction.date as Date}
+                      textColor={colors.white}
+                      mode='date'
+                      display={Platform.OS == 'ios' ? 'spinner' : 'default'}
+                      onChange={onDateChange}
+                    />
+                    {Platform.OS == 'ios' && (
+                      <TouchableOpacity
+                        style={styles.datePickerButton}
+                        onPress={() => setShowDatePicker(false)}>
+                        <Typo size={15} fontWeight={'500'}>
+                          Ok
+                        </Typo>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                )}
+              </>
             )}
           </View>
 
@@ -297,7 +338,6 @@ const TransactionModal = () => {
               Valor
             </Typo>
             <Input
-              // placeholder='Salary'
               keyboardType='numeric'
               value={transaction?.amount?.toString()}
               onChangeText={(value) =>
@@ -319,7 +359,6 @@ const TransactionModal = () => {
               </Typo>
             </View>
             <Input
-              // placeholder='Salary'
               value={transaction?.description}
               multiline
               containerStyle={{
@@ -337,8 +376,8 @@ const TransactionModal = () => {
             />
           </View>
 
-              {/* Receipt's image */}
-{/*           <View style={styles.inputContainer}>
+          {/* Receipt's image */}
+          {/* <View style={styles.inputContainer}>
             <View style={styles.flexRow}>
               <Typo color={colors.neutral200} size={16}>
                 Recibo
@@ -361,7 +400,7 @@ const TransactionModal = () => {
 
       <View style={styles.footer}>
         {/* delete transaction */}
-{/*         {oldTransaction?.id && !loading && (
+        {/* {oldTransaction?.id && !loading && (
           <Button
             onPress={showDeleteAlert}
             style={{
