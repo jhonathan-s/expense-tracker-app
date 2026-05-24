@@ -47,7 +47,7 @@ const Statistics = () => {
           }}>
           <View>
             <TransactionList
-              title='Transações'
+              title=''
               emptyListMessage='Nenhuma transação encontrada'
               data={transactions}
               loading={transactionLoading}
