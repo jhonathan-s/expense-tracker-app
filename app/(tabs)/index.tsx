@@ -18,11 +18,9 @@ const Home = () => {
   const { user } = useAuth()
   const router = useRouter()
 
-  const constraints = [
-    where('uid', '==', user?.uid),
-    orderBy('date', 'desc'),
-    limit(30)
-  ]
+  const constraints = user?.uid
+    ? [where('uid', '==', user.uid), orderBy('date', 'desc'), limit(30)]
+    : []
 
   const {
     data: recentTransactions,
