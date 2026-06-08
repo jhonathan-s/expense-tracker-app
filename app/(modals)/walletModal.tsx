@@ -122,7 +122,8 @@ const WalletModal = () => {
       </View>
 
       <View style={styles.footer}>
-        {oldWallet?.id && !loading && (
+        {/* Delete wallet */}
+{/*         {oldWallet?.id && !loading && (
           <Button
             onPress={showDeleteAlert}
             style={{
@@ -135,7 +136,7 @@ const WalletModal = () => {
               weight='bold'
             />
           </Button>
-        )}
+        )} */}
         <Button onPress={onSubmit} loading={loading} style={{ flex: 1 }}>
           <Typo color={colors.black} fontWeight={'700'}>
             {oldWallet?.id ? 'Atualizar Carteira' : 'Adicionar Carteira'}
