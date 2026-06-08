@@ -1,5 +1,6 @@
-import { firestore } from '@/config/firebase'
+import { firestore, functions } from '@/config/firebase'
 import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore'
+import { httpsCallable } from 'firebase/functions'
 
 export interface AdminUser {
   uid: string
@@ -59,19 +60,42 @@ export const deleteUser = async (uid: string): Promise<{
   message?: string
 }> => {
   try {
-    const firestoreResult = await deleteUserFromFirestore(uid)
+    // Call the Cloud Function to delete from both Auth and Firestore
+    const deleteUserAccountFn = httpsCallable(functions, 'deleteUserAccount')
+    const result = await deleteUserAccountFn({ uid })
 
-    if (firestoreResult.success) {
+    if (result.data.success) {
       return {
         success: true,
-        message:
-          'Usuário deletado com sucesso do Firestore.'
+        message: 'Usuário deletado com sucesso de Autenticação e Firestore.'
       }
     } else {
-      return firestoreResult
+      return {
+        success: false,
+        message: result.data.message || 'Erro ao deletar usuário.'
+      }
     }
   } catch (error: any) {
     console.log('Error deleting user:', error)
+    
+    // Provide user-friendly error messages
+    if (error.code === 'functions/permission-denied') {
+      return {
+        success: false,
+        message: 'Apenas administradores podem deletar usuários.'
+      }
+    } else if (error.code === 'functions/not-found') {
+      return {
+        success: false,
+        message: 'Usuário não encontrado em Autenticação Firebase.'
+      }
+    } else if (error.code === 'functions/unauthenticated') {
+      return {
+        success: false,
+        message: 'Você deve estar autenticado para deletar um usuário.'
+      }
+    }
+
     return {
       success: false,
       message: error?.message || 'Erro ao deletar usuário.'
