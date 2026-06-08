@@ -310,11 +310,13 @@ const Admin = () => {
               {' '}(carteiras, transações, recibos) serão deletados permanentemente.
             </Typo>
 
-            {deleteError ? (
-              <Typo size={13} color='#dc2626' style={styles.errorText}>
-                {deleteError}
-              </Typo>
-            ) : null}
+            <Typo
+              size={13}
+              color={colors.neutral400}
+              style={styles.modalSubMessage}>
+              Esta ação irá deletar o usuário de Firestore e Firebase
+              Authentication permanentemente.
+            </Typo>
 
             <View style={styles.modalActions}>
               <Pressable
