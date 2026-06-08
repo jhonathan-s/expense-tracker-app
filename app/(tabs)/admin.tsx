@@ -1,9 +1,10 @@
 import Header from '@/components/Header'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import Typo from '@/components/Typo'
+import { firestore } from '@/config/firebase'
 import { colors, radius, spacingX, spacingY } from '@/constants/theme'
 import { useAuth } from '@/contexts/authContext'
-import { deleteUser, fetchAllUsers, AdminUser } from '@/services/adminService'
+import { fetchAllUsers, AdminUser } from '@/services/adminService'
 import { verticalScale } from '@/utils/styling'
 import { useFocusEffect } from '@react-navigation/native'
 import { Lock, Trash, WarningCircle, X } from 'phosphor-react-native'
@@ -18,18 +19,28 @@ import {
   ActivityIndicator
 } from 'react-native'
 import Animated, { FadeInDown } from 'react-native-reanimated'
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  query,
+  where,
+  writeBatch
+} from 'firebase/firestore'
 
 const Admin = () => {
   const { user } = useAuth()
   const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(false)
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false)
   const [selectedUserForDelete, setSelectedUserForDelete] =
     useState<AdminUser | null>(null)
-  const [deleting, setDeleting] = useState(false)
   const [message, setMessage] = useState<{ type: string; text: string } | null>(
     null
   )
+  const [deleteAccountModalVisible, setDeleteAccountModalVisible] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
+  const [deleteAccountLoading, setDeleteAccountLoading] = useState(false)
 
   const isAdmin = user?.email === 'admin@admin.com'
 
@@ -41,7 +52,7 @@ const Admin = () => {
     } else {
       setMessage({
         type: 'error',
-        text: result.message || 'Failed to load users'
+        text: result.message || 'Erro ao carregar usuários.'
       })
     }
     setLoading(false)
@@ -55,40 +66,100 @@ const Admin = () => {
     }, [isAdmin, loadUsers])
   )
 
-  const handleDeletePress = (userItem: AdminUser) => {
+  const handleDeleteAccountPress = (userItem: AdminUser) => {
     setSelectedUserForDelete(userItem)
-    setDeleteModalVisible(true)
+    setDeleteAccountModalVisible(true)
   }
 
-  const handleConfirmDelete = async () => {
+  const handleDeleteAccountConfirm = async () => {
     if (!selectedUserForDelete) return
 
-    setDeleting(true)
-    const result = await deleteUser(selectedUserForDelete.uid)
-    setDeleting(false)
+    setDeleteAccountLoading(true)
+    setDeleteError('')
 
-    setDeleteModalVisible(false)
+    try {
+      // Delete as admin (without password requirement)
+      await deleteUserTransactions(selectedUserForDelete.uid)
+      await deleteUserWallets(selectedUserForDelete.uid)
 
-    if (result.success) {
+      // Delete user document
+      const userRef = doc(firestore, 'users', selectedUserForDelete.uid)
+      await deleteDoc(userRef)
+
+      setDeleteAccountModalVisible(false)
       setMessage({
         type: 'success',
-        text: result.message || 'User deleted successfully'
+        text: 'Conta e todos os dados associados foram deletados com sucesso.'
       })
       setUsers((prevUsers) =>
         prevUsers.filter((u) => u.uid !== selectedUserForDelete.uid)
       )
-    } else {
-      setMessage({
-        type: 'error',
-        text: result.message || 'Failed to delete user'
-      })
+      setSelectedUserForDelete(null)
+
+      setTimeout(() => {
+        setMessage(null)
+      }, 3000)
+    } catch (error: any) {
+      setDeleteError(error?.message || 'Ocorreu um erro ao deletar a conta.')
+    } finally {
+      setDeleteAccountLoading(false)
     }
+  }
 
-    setSelectedUserForDelete(null)
+  const deleteUserTransactions = async (uid: string): Promise<void> => {
+    try {
+      let hasMoreTransactions = true
 
-    setTimeout(() => {
-      setMessage(null)
-    }, 3000)
+      while (hasMoreTransactions) {
+        const transactionQuery = query(
+          collection(firestore, 'transactions'),
+          where('uid', '==', uid)
+        )
+
+        const transactionSnapshot = await getDocs(transactionQuery)
+        if (transactionSnapshot.size === 0) {
+          hasMoreTransactions = false
+          break
+        }
+
+        const batch = writeBatch(firestore)
+        transactionSnapshot.forEach((transactionDoc) => {
+          batch.delete(transactionDoc.ref)
+        })
+
+        await batch.commit()
+      }
+    } catch (error: any) {
+      throw error
+    }
+  }
+
+  const deleteUserWallets = async (uid: string): Promise<void> => {
+    try {
+      let hasMoreWallets = true
+
+      while (hasMoreWallets) {
+        const walletQuery = query(
+          collection(firestore, 'wallets'),
+          where('uid', '==', uid)
+        )
+
+        const walletSnapshot = await getDocs(walletQuery)
+        if (walletSnapshot.size === 0) {
+          hasMoreWallets = false
+          break
+        }
+
+        const batch = writeBatch(firestore)
+        walletSnapshot.forEach((walletDoc) => {
+          batch.delete(walletDoc.ref)
+        })
+
+        await batch.commit()
+      }
+    } catch (error: any) {
+      throw error
+    }
   }
 
   if (!isAdmin) {
@@ -192,16 +263,8 @@ const Admin = () => {
                   </View>
 
                   <TouchableOpacity
-                    style={[
-                      styles.deleteButton,
-                      {
-                        backgroundColor:
-                          item.uid === user?.uid
-                            ? colors.neutral600
-                            : colors.rose
-                      }
-                    ]}
-                    onPress={() => handleDeletePress(item)}
+                    style={[styles.deleteAccountButton]}
+                    onPress={() => handleDeleteAccountPress(item)}
                     disabled={item.uid === user?.uid}>
                     <Trash size={18} color={colors.white} weight='fill' />
                   </TouchableOpacity>
@@ -218,57 +281,56 @@ const Admin = () => {
       <Modal
         transparent
         animationType='fade'
-        visible={deleteModalVisible}
-        onRequestClose={() => setDeleteModalVisible(false)}>
+        visible={deleteAccountModalVisible}
+        onRequestClose={() => !deleteAccountLoading && setDeleteAccountModalVisible(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <Pressable
               style={styles.modalCloseIcon}
-              onPress={() => setDeleteModalVisible(false)}>
+              onPress={() => !deleteAccountLoading && setDeleteAccountModalVisible(false)}
+              disabled={deleteAccountLoading}>
               <X size={20} color={colors.neutral300} weight='bold' />
             </Pressable>
 
             <WarningCircle
               size={verticalScale(48)}
-              color={colors.rose}
+              color={'#dc2626'}
               weight='fill'
             />
 
             <Typo size={18} fontWeight='700' style={styles.modalTitle}>
-              Deletar Usuário
+              Deletar Conta Completamente
             </Typo>
 
             <Typo size={15} color={colors.textLighter} style={styles.modalMessage}>
-              Tem certeza que deseja deletar o usuário{' '}
-              <Typo size={15} fontWeight='700' color={colors.rose}>
+              Esta ação é irreversível. Todos os dados de{' '}
+              <Typo size={15} fontWeight='700' color={'#dc2626'}>
                 {selectedUserForDelete?.name}
               </Typo>
-              ?
+              {' '}(carteiras, transações, recibos) serão deletados permanentemente.
             </Typo>
 
-            <Typo
-              size={13}
-              color={colors.neutral400}
-              style={styles.modalSubMessage}>
-              Esta ação irá deletar o usuário de Firestore. Para deletar a
-              autenticação, acesse o Firebase Console.
-            </Typo>
+            {deleteError ? (
+              <Typo size={13} color='#dc2626' style={styles.errorText}>
+                {deleteError}
+              </Typo>
+            ) : null}
 
             <View style={styles.modalActions}>
               <Pressable
                 style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => setDeleteModalVisible(false)}
-                disabled={deleting}>
+                onPress={() => setDeleteAccountModalVisible(false)}
+                disabled={deleteAccountLoading}>
                 <Typo size={15} fontWeight='700' color={colors.text}>
                   Cancelar
                 </Typo>
               </Pressable>
 
               <Pressable
-                style={[styles.modalButton, styles.deleteButtonModal]}
-                onPress={handleConfirmDelete}
-                disabled={deleting}>
-                {deleting ? (
+                style={[styles.modalButton, styles.deleteAccountButtonModal]}
+                onPress={handleDeleteAccountConfirm}
+                disabled={deleteAccountLoading}>
+                {deleteAccountLoading ? (
                   <ActivityIndicator size='small' color={colors.white} />
                 ) : (
                   <Typo size={15} fontWeight='700' color={colors.white}>
@@ -345,14 +407,15 @@ const styles = StyleSheet.create({
     gap: spacingY._5
   },
   email: {
-    marginTop: spacingY._3
+    marginTop: spacingY._30
   },
-  deleteButton: {
+  deleteAccountButton: {
     width: verticalScale(44),
     height: verticalScale(44),
     borderRadius: radius._12,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: '#dc2626'
   },
   modalOverlay: {
     flex: 1,
@@ -403,7 +466,10 @@ const styles = StyleSheet.create({
   cancelButton: {
     backgroundColor: colors.neutral600
   },
-  deleteButtonModal: {
-    backgroundColor: colors.rose
+  deleteAccountButtonModal: {
+    backgroundColor: '#dc2626'
+  },
+  errorText: {
+    textAlign: 'center'
   }
 })
