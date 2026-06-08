@@ -29,6 +29,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     borderRadius: radius._12,
     borderCurve: 'continuous',
-    padding: 5
+    padding: 5,
+    marginTop: verticalScale(30),
   }
 })
