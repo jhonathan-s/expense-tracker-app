@@ -3,7 +3,8 @@ import { useRouter } from 'expo-router'
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
-  signInWithEmailAndPassword
+  signInWithEmailAndPassword,
+  signOut
 } from 'firebase/auth'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { createContext, useContext, useEffect, useState } from 'react'
@@ -82,6 +83,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           image: data?.image || null
         }
         setUser({ ...userData })
+      } else {
+        // User document doesn't exist in Firestore but exists in Auth
+        // This means the account was deleted by admin
+        // Sign out the user to prevent access
+        console.log('User document not found in Firestore. Signing out user.')
+        await signOut(auth)
+        setUser(null)
+        router.replace('/(auth)/welcome')
       }
     } catch (error: any) {
       let msg = error.message
